@@ -1,0 +1,9 @@
+idf_component_register(
+	SRCS
+	"main.c"
+	"damping.c"
+	"decode_mjpeg.c"
+	"button.c"
+	INCLUDE_DIRS
+	"."
+)
