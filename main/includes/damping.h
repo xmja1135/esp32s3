@@ -24,7 +24,5 @@ typedef struct
     int8_t delta_brightness;
 } damping_data_t;
 
-
-
 void damping_task_cb(void *arg);
-void slider_event_cb(lv_event_t *e);
+void damping_set_brightness(uint8_t brightness_to);

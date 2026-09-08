@@ -56,7 +56,17 @@ static esp_err_t switchAlbumFile(bool isSwitch); // 打开/切换SD卡mjpeg相�
 static esp_err_t closeAlbumFile();               // 关闭文件
 static void tabview_changed_cb(lv_event_t *);    // 标签页变化事件回调
 /* 声明函数 ++++++++++++++++++++++ */
-
+static void slider_event_cb(lv_event_t *e)
+{
+    lv_obj_t *slider = lv_event_get_target_obj(e);
+    lv_event_code_t code = lv_event_get_code(e);
+    int32_t value = lv_slider_get_value(slider);
+    if (code == LV_EVENT_RELEASED)
+    {
+        ESP_LOGI(TAG, "slider released at %d", (int)value);
+        damping_set_brightness((uint8_t)value);
+    }
+}
 void button_single_click_cb(void *arg, void *usr_data)
 {
     ESP_LOGI(TAG, "Button single click!");
