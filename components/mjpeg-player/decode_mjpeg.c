@@ -1,8 +1,8 @@
 
-#include "includes/decode_mjpeg.h"
-
+#include "decode_mjpeg.h"
 #define USE_OUTBUF_POOL
-struct esp_jpeg_stream jpeg_stream_handle = {0};
+
+
 static jpeg_pixel_format_t j_type = JPEG_PIXEL_FORMAT_RGB565_LE;
 static jpeg_rotate_t j_rotation = JPEG_ROTATE_0D;
 

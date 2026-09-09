@@ -1,0 +1,17 @@
+idf_component_register(
+	SRCS
+	"decode_mjpeg.c"
+	"mjpeg-player.c"
+	INCLUDE_DIRS
+	"include"
+	REQUIRES
+	fatfs
+	vfs
+	freertos
+	lvgl
+	esp_common
+	log
+	heap
+	esp_new_jpeg
+	esp32_s3_touch_amoled_2_16
+)

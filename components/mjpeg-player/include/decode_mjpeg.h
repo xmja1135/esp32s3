@@ -1,6 +1,5 @@
 #pragma once
-#include "nvs_flash.h"
-#include "nvs.h"
+
 #include "esp_log.h"
 #include "esp_err.h"
 #include "esp_check.h"
@@ -10,7 +9,7 @@
 
 #define SD_READ_CHUNK_SIZE (32 * 1024) // 64KB 内部读取块大小（建议与 SD 簇对齐）
 
-extern struct esp_jpeg_stream jpeg_stream_handle;
+// extern struct esp_jpeg_stream jpeg_stream_handle;
 
 struct esp_jpeg_stream
 {

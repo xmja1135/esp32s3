@@ -1,9 +1,9 @@
 #include "includes/damping.h"
 
 static const char *TAG = "stu6";
-// static TaskHandle_t damping_task_handle;
+static TaskHandle_t damping_task_handle; // 阻尼任务
 
-damping_data_t damping_data = {
+static damping_data_t damping_data = {
     .max_count = DAMPING_DURING,
     .now_count = 0,
     .prev_brightness = 100,
@@ -46,4 +46,9 @@ void damping_task_cb(void *arg)
         // ESP_LOGI(TAG, "brightness is %d", brightness);
     }
     vTaskDelete(NULL);
+}
+
+void damping_init(void)
+{
+    xTaskCreatePinnedToCore(damping_task_cb, "damping_task", 2048, NULL, 3, &damping_task_handle, 0);
 }

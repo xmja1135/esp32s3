@@ -9,8 +9,8 @@ static const char *TAG = "button_demo";
 //     ESP_LOGI(TAG, "Button single click!");
 // }
 
-extern void button_single_click_cb(void *arg, void *usr_data);
-void button_init()
+// extern void button_single_click_cb(void *arg, void *usr_data);
+void button_init(button_cb_t button_single_click_cb)
 {
     // 1. 配置按键
     const button_config_t btn_cfg = {0}; // 使用默认配置
