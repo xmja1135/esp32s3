@@ -1,0 +1,10 @@
+idf_component_register(
+	SRCS
+	"main.c"
+	INCLUDE_DIRS
+	"."
+	PRIV_REQUIRES
+	time_manager
+	esp_wifi
+	nvs_flash
+)
