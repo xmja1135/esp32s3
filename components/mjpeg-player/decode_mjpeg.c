@@ -1,6 +1,8 @@
 
 #include "decode_mjpeg.h"
+
 #define USE_OUTBUF_POOL
+#define SD_READ_CHUNK_SIZE (32 * 1024) // 64KB 内部读取块大小（建议与 SD 簇对齐）
 
 
 static jpeg_pixel_format_t j_type = JPEG_PIXEL_FORMAT_RGB565_LE;

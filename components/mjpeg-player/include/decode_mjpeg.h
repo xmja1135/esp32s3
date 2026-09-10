@@ -7,7 +7,6 @@
 #include "esp_memory_utils.h"
 #include "esp_heap_caps.h"
 
-#define SD_READ_CHUNK_SIZE (32 * 1024) // 64KB 内部读取块大小（建议与 SD 簇对齐）
 
 // extern struct esp_jpeg_stream jpeg_stream_handle;
 
