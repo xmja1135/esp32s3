@@ -171,6 +171,10 @@ void mjpeg_player_init(lv_obj_t *show_obj)
 esp_err_t mjpeg_group_clear()
 {
     EventBits_t bits = mjpeg_group_get();
+     if (bits == 0)
+    {
+        return ESP_OK;
+    }
     if (bits & READY_DONE)
     {
         xEventGroupClearBits(sw_album_group, 0x0F);
