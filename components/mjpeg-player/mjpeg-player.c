@@ -46,22 +46,21 @@ void buffer_task_cb(void *arg)
         EventBits_t bits = xEventGroupGetBits(sw_album_group);
         if (bits & ANIME_PAUSE)
         {
-            // 停止移入ready队列,准备切换mjpeg
+            // 停止移入ready队列
             xEventGroupSetBits(sw_album_group, IDLE_DONE);
-            // 队列全部初始化完成,关闭file
-            if (bits & READY_DONE)
+            isSwitch = (bits & SWITCHING) ? true : false;
+            // 必须队列初始化完成且使用切换相册时,任务才会再次播放动画
+            if (bits & READY_DONE && isSwitch)
             {
-                if (mjpeg_close_album_file() == ESP_OK)
+                // 队列全部初始化完成,关闭file,切换相册
+                if (mjpeg_close_album_file() == ESP_OK && mjpeg_switch_album_file(isSwitch) == ESP_OK)
                 {
-                    isSwitch = (bits & 0x08) ? true : false;
-                    if (mjpeg_switch_album_file(isSwitch) == ESP_OK)
-                    {
-                        xEventGroupClearBits(sw_album_group, 0x0F);
-                    }
+                    // 清除事件组,立即播放动画
+                    xEventGroupClearBits(sw_album_group, 0x0F);
                 }
             }
-
-            vTaskDelay(pdMS_TO_TICKS(50));
+            isSwitch = false;
+            vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         }
         if (xQueueReceive(idle_queue, &buf, portMAX_DELAY) == pdPASS)
@@ -94,7 +93,7 @@ void mjpeg_task_cb(void *arg)
         if (bits & ANIME_PAUSE)
         {
             // 将ready队列全部移入idle队列,准备切换mjpeg
-            if (xQueueReceive(ready_queue, &buf, pdMS_TO_TICKS(500)) == pdPASS)
+            if (xQueueReceive(ready_queue, &buf, pdMS_TO_TICKS(100)) == pdPASS)
             {
                 xQueueSend(idle_queue, &buf, portMAX_DELAY);
             }
@@ -164,18 +163,24 @@ void mjpeg_player_init(lv_obj_t *show_obj)
     esp_jpeg_stream_open(&jpeg_stream_handle);
 
     // 任务
-    xTaskCreatePinnedToCore(buffer_task_cb, "buffer_task", 4096 * 3, &g_player, 4, &buffer_task_handle, 0);
-    xTaskCreatePinnedToCore(mjpeg_task_cb, "mjpeg_task", 4096 * 3, &g_player, 4, &mjpeg_task_handle, 1);
+    xTaskCreatePinnedToCore(buffer_task_cb, "buffer_task", 2048, &g_player, 4, &buffer_task_handle, 0);
+    xTaskCreatePinnedToCore(mjpeg_task_cb, "mjpeg_task", 2048, &g_player, 4, &mjpeg_task_handle, 1);
 }
 
-// 切换相册时(NULL为清除所有状态)
-void mjpeg_group_set(uint8_t bit)
+// 手动触发播放动画
+esp_err_t mjpeg_group_clear()
 {
-    if (bit == 0)
+    EventBits_t bits = mjpeg_group_get();
+    if (bits & READY_DONE)
     {
         xEventGroupClearBits(sw_album_group, 0x0F);
-        return;
+        return ESP_OK;
     }
+    return ESP_FAIL;
+}
+// 手动切换状态(如果只是暂停动画,需要手动调用"mjpeg_group_clear"重新播放它);如果是切换相册,在任务中会自动执行动画播放
+void mjpeg_group_set(uint8_t bit)
+{
     xEventGroupSetBits(sw_album_group, bit);
 }
 EventBits_t mjpeg_group_get()

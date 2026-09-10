@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-# idf_build_set_property(MINIMAL_BUILD ON)
+idf_build_set_property(MINIMAL_BUILD ON)
 project(stu6)
 
 # 确保在 project() 之后

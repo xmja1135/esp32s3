@@ -38,12 +38,12 @@ enum album_event
     SWITCHING = 0x08,
 };
 
-
 void buffer_task_cb(void *arg);                   // 单帧队列,任务回调
 void mjpeg_task_cb(void *arg);                    // 解码输出,任务回调
 esp_err_t mjpeg_switch_album_file(bool isSwitch); // 打开/切换SD卡mjpeg相册组
 esp_err_t mjpeg_close_album_file();               // 关闭文件
 void mjpeg_player_init(lv_obj_t *show_obj);
 
-EventBits_t mjpeg_group_get();     // 获取任务组状态
-void mjpeg_group_set(uint8_t bit); // 设置任务组状态
+EventBits_t mjpeg_group_get();     // 获取事件组状态
+void mjpeg_group_set(uint8_t bit); // 设置事件组状态
+esp_err_t mjpeg_group_clear();          // 清除事件组状态

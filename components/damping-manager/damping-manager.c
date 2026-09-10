@@ -1,6 +1,6 @@
-#include "includes/damping.h"
+#include "damping-manager.h"
 
-static const char *TAG = "stu6";
+static const char *TAG = "damping";
 static TaskHandle_t damping_task_handle; // 阻尼任务
 
 static damping_data_t damping_data = {
@@ -22,7 +22,7 @@ void damping_task_cb(void *arg)
 {
     uint8_t b;
     float p = 0.0;
-    const TickType_t xFrequency = pdMS_TO_TICKS(20);
+    const TickType_t xFrequency = pdMS_TO_TICKS(10);
     TickType_t xLastWakeTime = xTaskGetTickCount();
     for (;;)
     {
@@ -43,12 +43,11 @@ void damping_task_cb(void *arg)
         bsp_display_lock(-1);
         bsp_display_brightness_set(b);
         bsp_display_unlock();
-        // ESP_LOGI(TAG, "brightness is %d", brightness);
     }
     vTaskDelete(NULL);
 }
 
 void damping_init(void)
 {
-    xTaskCreatePinnedToCore(damping_task_cb, "damping_task", 2048, NULL, 3, &damping_task_handle, 0);
+    xTaskCreatePinnedToCore(damping_task_cb, "damping_task", 2048, NULL, 5, &damping_task_handle, 0);
 }

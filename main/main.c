@@ -1,8 +1,21 @@
-#include "includes/main.h"
-#include "weather_font_ttf.h"
-#include "includes/damping.h"
-#include "includes/button.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
+#include "nvs_flash.h"
+#include "nvs.h"
+#include "esp_log.h"
+#include "esp_err.h"
+#include "esp_check.h"
+#include "esp_memory_utils.h"
+#include "lvgl.h"
+#include "bsp/esp-bsp.h"
+#include "bsp/display.h"
+
+#include "damping-manager.h"
+#include "button-manager.h"
 #include "mjpeg-player.h"
+
+#include "include/weather_font_ttf.h"
 
 /* 声明变量 ====================== */
 static const char *TAG = "stu6";
@@ -14,7 +27,6 @@ static lv_obj_t *tab1;
 static lv_obj_t *wallpaper;
 /* 声明变量 ====================== */
 /* 声明函数 ++++++++++++++++++++++ */
-
 static void tabview_changed_cb(lv_event_t *); // 标签页变化事件回调
 /* 声明函数 ++++++++++++++++++++++ */
 static void slider_event_cb(lv_event_t *e)
@@ -28,22 +40,65 @@ static void slider_event_cb(lv_event_t *e)
         damping_set_brightness((uint8_t)value);
     }
 }
-void button_single_click_cb(void *arg, void *usr_data)
+// 暂停输入设备（禁用触摸）
+void lock_touch_indev(void)
 {
-    ESP_LOGI(TAG, "Button single click!");
-    // xEventGroupSetBits(sw_album_group, ANIME_PAUSE | SWITCHING);
-    mjpeg_group_set(ANIME_PAUSE | SWITCHING);
+    lv_indev_t *indev = lv_indev_get_next(NULL); // 获取默认触摸屏输入设备
+    if (indev != NULL)
+    {
+        lv_indev_enable(indev, false); // 禁用触摸设备
+    }
+}
+// 恢复输入设备（启用触摸）
+void unlock_touch_indev(void)
+{
+    lv_indev_t *indev = lv_indev_get_next(NULL);
+    if (indev != NULL)
+    {
+        lv_indev_enable(indev, true); // 恢复触摸设备
+    }
+}
+void button_click_cb(void *button_handle, void *usr_data)
+{
+    button_event_t event = iot_button_get_event((button_handle_t)button_handle);
+    switch (event)
+    {
+    case BUTTON_SINGLE_CLICK:
+        ESP_LOGI(TAG, "Button single click!");
+        mjpeg_group_set(ANIME_PAUSE | SWITCHING);
+        break;
+    case BUTTON_DOUBLE_CLICK:
+        ESP_LOGI(TAG, "双击");
+        if (bsp_display_brightness_get() > 5)
+        {
+            mjpeg_group_set(ANIME_PAUSE);
+            damping_set_brightness(3);
+            lock_touch_indev();
+        }
+        else
+        {
+            if (mjpeg_group_clear() == ESP_OK)
+            {
+                damping_set_brightness(50);
+                unlock_touch_indev();
+            }
+        }
+        break;
+    case BUTTON_LONG_PRESS_START:
+        ESP_LOGI(TAG, "长按开始");
+        break;
+    default:
+        ESP_LOGI(TAG, "其他事件: %d", event);
+        break;
+    }
 }
 
 static void tabview_changed_cb(lv_event_t *e)
 {
     uint32_t tabIndex = lv_tabview_get_tab_active(tabview);
-    EventBits_t bits = mjpeg_group_get(); // xEventGroupGetBits(sw_album_group);
-    if (tabIndex == 0 && (bits & READY_DONE))
+    // EventBits_t bits = mjpeg_group_get(); // xEventGroupGetBits(sw_album_group);
+    if (tabIndex == 0 && (mjpeg_group_clear() == ESP_OK))
     {
-
-        // xEventGroupClearBits(sw_album_group, 0x0F);
-        mjpeg_group_set(0);
         ESP_LOGI(TAG, "tabview changed, anime playing!");
     }
     else
@@ -184,7 +239,7 @@ void app_main(void)
     lv_obj_set_size(wallpaper, 432, 243);
     bsp_display_unlock();
     // 自定义按键初始化
-    button_init(button_single_click_cb);
+    button_init(button_click_cb);
     // 屏幕亮度调节阻尼初始化
     damping_init();
     // 加载外部flash初始化

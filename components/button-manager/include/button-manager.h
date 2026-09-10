@@ -1,6 +1,5 @@
 #pragma once
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+
 #include "esp_log.h"
 #include "iot_button.h"
 #include "button_gpio.h"

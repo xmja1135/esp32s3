@@ -9,7 +9,7 @@
 #include "bsp/display.h"
 
 #define DAMPING_DURING 120 // 阻尼持续值
-#define EASING_CASE 0.8    // 缓动参数
+#define EASING_CASE 0.9    // 缓动参数
 
 // 阻尼状态
 typedef struct

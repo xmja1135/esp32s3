@@ -1,8 +1,8 @@
 idf_component_register(
 	SRCS
 	"main.c"
-	"damping.c"
-	"button.c"
+	# "damping.c"
+	# "button.c"
 	INCLUDE_DIRS
 	"."
 	PRIV_REQUIRES
@@ -10,4 +10,6 @@ idf_component_register(
 	nvs_flash
 	esp_new_jpeg
 	mjpeg-player
+	damping-manager
+	button-manager
 )
